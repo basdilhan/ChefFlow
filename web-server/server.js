@@ -90,7 +90,9 @@ async function rehydrateQueue() {
         // Convert to array and sort by timestamp in JavaScript
         const orders = [];
         snapshot.forEach((doc) => {
-            orders.push(doc.data());
+            const order = doc.data();
+            console.log(`  - Order #${order.id}: ${order.items} (VIP: ${order.isVip}, Status: ${order.status})`);
+            orders.push(order);
         });
         
         // Sort: VIP first, then by timestamp
@@ -245,7 +247,7 @@ app.get('/live-queue', (req, res) => {
  */
 app.get('/api/analytics', async (req, res) => {
     try {
-        const { period = 'today' } = req.query;
+        const { period = 'all' } = req.query;
         
         let startDate = new Date();
         startDate.setHours(0, 0, 0, 0);
@@ -254,31 +256,74 @@ app.get('/api/analytics', async (req, res) => {
             startDate.setDate(startDate.getDate() - 7);
         } else if (period === 'month') {
             startDate.setMonth(startDate.getMonth() - 1);
+        } else if (period === 'all') {
+            startDate = new Date(0); // Unix epoch - get all orders
         }
         
-        const snapshot = await ordersCollection
-            .where('timestamp', '>=', startDate)
-            .orderBy('timestamp', 'desc')
-            .get();
+        // Fetch all orders and filter by date in JavaScript to avoid index issues
+        const snapshot = await ordersCollection.get();
+        const startTime = startDate.getTime();
+        
+        console.log(`Analytics: Fetched ${snapshot.size} total orders from Firebase`);
+        console.log(`  Period: ${period}, Start time: ${startDate.toISOString()}`);
         
         const orders = [];
         let totalOrders = 0;
         let completedOrders = 0;
         let cancelledOrders = 0;
+        let pendingOrders = 0;
         let vipOrders = 0;
         let expressOrders = 0;
         let totalPrepTime = 0;
         
         snapshot.forEach((doc) => {
-            const order = { id: doc.id, ...doc.data() };
-            orders.push(order);
-            totalOrders++;
+            const orderData = doc.data();
+            const order = { id: doc.id, ...orderData };
             
-            if (order.status === 'COMPLETED') completedOrders++;
-            if (order.status === 'CANCELLED') cancelledOrders++;
-            if (order.isVip) vipOrders++;
-            if (order.isExpress) expressOrders++;
-            totalPrepTime += order.prepTime || 0;
+            // Handle different timestamp formats
+            let orderTime = null;
+            if (orderData.timestamp instanceof admin.firestore.Timestamp) {
+                orderTime = orderData.timestamp.toMillis();
+            } else if (orderData.timestamp && typeof orderData.timestamp === 'object' && orderData.timestamp._seconds) {
+                orderTime = orderData.timestamp._seconds * 1000;
+            } else if (typeof orderData.timestamp === 'number') {
+                orderTime = orderData.timestamp;
+            } else {
+                // If no timestamp, use current time (for newly created orders)
+                console.log(`  Warning: Order #${order.id} has no valid timestamp, using current time`);
+                orderTime = Date.now();
+            }
+            
+            console.log(`  Processing Order #${order.id}: status=${order.status}, timestamp=${new Date(orderTime).toLocaleString()}, isVip=${order.isVip}`);
+            
+            // Filter by period
+            if (orderTime >= startTime) {
+                orders.push(order);
+                totalOrders++;
+                
+                if (order.status === 'COMPLETED') completedOrders++;
+                else if (order.status === 'CANCELLED') cancelledOrders++;
+                else if (order.status === 'PENDING') pendingOrders++;
+                
+                if (order.isVip) vipOrders++;
+                if (order.isExpress) expressOrders++;
+                totalPrepTime += order.prepTime || 0;
+            }
+        });
+        
+        console.log(`Analytics: Filtered to ${totalOrders} orders for period '${period}'`);
+        console.log(`  - Completed: ${completedOrders}, Pending: ${pendingOrders}, Cancelled: ${cancelledOrders}`);
+        console.log(`  - VIP: ${vipOrders}, Express: ${expressOrders}`);
+        
+        // Sort orders by timestamp descending
+        orders.sort((a, b) => {
+            const getTime = (ts) => {
+                if (ts instanceof admin.firestore.Timestamp) return ts.toMillis();
+                if (ts && ts._seconds) return ts._seconds * 1000;
+                if (typeof ts === 'number') return ts;
+                return 0;
+            };
+            return getTime(b.timestamp) - getTime(a.timestamp);
         });
         
         const avgPrepTime = totalOrders > 0 ? Math.round(totalPrepTime / totalOrders) : 0;
@@ -289,7 +334,7 @@ app.get('/api/analytics', async (req, res) => {
                 totalOrders,
                 completedOrders,
                 cancelledOrders,
-                pendingOrders: totalOrders - completedOrders - cancelledOrders,
+                pendingOrders,
                 vipOrders,
                 expressOrders,
                 avgPrepTime,
@@ -298,7 +343,7 @@ app.get('/api/analytics', async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching analytics:', error);
-        res.status(500).json({ error: 'Failed to fetch analytics' });
+        res.status(500).json({ error: 'Failed to fetch analytics', details: error.message });
     }
 });
 
@@ -332,32 +377,46 @@ let lastSyncTimestamp = Date.now();
 
 async function syncWithDatabase() {
     try {
+        // Fetch all pending orders (no compound index needed)
         const snapshot = await ordersCollection
             .where('status', '==', 'PENDING')
-            .where('timestamp', '>', lastSyncTimestamp)
             .get();
         
         if (!snapshot.empty) {
-            console.log(`Syncing ${snapshot.size} new orders from other servers...`);
-            
             const orders = [];
             snapshot.forEach((doc) => {
-                orders.push(doc.data());
-            });
-            
-            orders.sort((a, b) => a.timestamp - b.timestamp);
-            
-            orders.forEach((order) => {
-                // Check if order already exists in current queue
-                const exists = currentQueue.some(q => q.id === order.id);
-                if (!exists) {
-                    const command = order.isVip 
-                        ? `VIP,${order.id},${order.items},${order.prepTime},${order.isExpress || false}`
-                        : `ADD,${order.id},${order.items},${order.prepTime},${order.isExpress || false}`;
-                    
-                    sendToJava(command);
+                const order = doc.data();
+                // Filter by timestamp in JavaScript
+                const orderTime = order.timestamp instanceof admin.firestore.Timestamp 
+                    ? order.timestamp.toMillis() 
+                    : order.timestamp;
+                
+                if (orderTime > lastSyncTimestamp) {
+                    orders.push(order);
                 }
             });
+            
+            if (orders.length > 0) {
+                console.log(`Syncing ${orders.length} new orders from other servers...`);
+                
+                orders.sort((a, b) => {
+                    const timeA = a.timestamp instanceof admin.firestore.Timestamp ? a.timestamp.toMillis() : a.timestamp;
+                    const timeB = b.timestamp instanceof admin.firestore.Timestamp ? b.timestamp.toMillis() : b.timestamp;
+                    return timeA - timeB;
+                });
+                
+                orders.forEach((order) => {
+                    // Check if order already exists in current queue
+                    const exists = currentQueue.some(q => q.id === order.id);
+                    if (!exists) {
+                        const command = order.isVip 
+                            ? `VIP,${order.id},${order.items},${order.prepTime},${order.isExpress || false}`
+                            : `ADD,${order.id},${order.items},${order.prepTime},${order.isExpress || false}`;
+                        
+                        sendToJava(command);
+                    }
+                });
+            }
         }
         
         lastSyncTimestamp = Date.now();

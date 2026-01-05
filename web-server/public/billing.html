@@ -544,14 +544,15 @@
         // Load stats
         async function loadStats() {
             try {
-                const response = await fetch('/live-queue');
+                const response = await fetch('/api/stats');
                 const data = await response.json();
-                const queue = data.queue || [];
                 
-                document.getElementById('todayOrders').textContent = orderCount;
-                document.getElementById('vipCount').textContent = vipOrderCount;
+                document.getElementById('todayOrders').textContent = data.totalOrders || 0;
+                document.getElementById('vipCount').textContent = data.vipOrders || 0;
             } catch (error) {
                 console.error('Error loading stats:', error);
+                document.getElementById('todayOrders').textContent = orderCount;
+                document.getElementById('vipCount').textContent = vipOrderCount;
             }
         }
 

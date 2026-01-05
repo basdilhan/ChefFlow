@@ -16,13 +16,18 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             color: #0A2540;
             line-height: 1.6;
+            overflow-x: hidden;
         }
 
         /* Navigation */
         nav {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             padding: 20px 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
         }
 
         nav .container {
@@ -56,40 +61,45 @@
         }
 
         .nav-links a:hover {
-            color: #0A2540;
+            color: #667eea;
         }
 
-        /* Hero Section */
+        /* Hero Section with Animation */
         .hero {
             max-width: 1200px;
-            margin: 80px auto;
+            margin: 60px auto;
             padding: 0 40px;
-            text-align: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            min-height: 70vh;
+        }
+
+        .hero-content {
+            animation: slideInLeft 0.8s ease-out;
         }
 
         .hero h1 {
-            font-size: 64px;
+            font-size: 56px;
             font-weight: 800;
-            color: #0A2540;
+            color: white;
             margin-bottom: 20px;
             letter-spacing: -2px;
+            line-height: 1.1;
         }
 
         .hero .tagline {
-            font-size: 22px;
-            color: #425466;
-            margin-bottom: 50px;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 40px;
             font-weight: 400;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         .cta-buttons {
             display: flex;
             gap: 20px;
-            justify-content: center;
-            margin-bottom: 80px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -97,7 +107,7 @@
             font-size: 16px;
             font-weight: 600;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
@@ -105,100 +115,225 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            background: white;
+            color: #667eea;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #6941a1 100%);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
             transform: translateY(-2px);
         }
 
         .btn-secondary {
-            background: white;
-            color: #0A2540;
-            border: 2px solid #e0e6eb;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
         }
 
         .btn-secondary:hover {
-            border-color: #0A2540;
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
         }
 
-        /* Features Section */
-        .features {
-            max-width: 1200px;
-            margin: 0 auto 100px;
-            padding: 0 40px;
+        /* Restaurant Animation Container */
+        .hero-animation {
+            position: relative;
+            height: 500px;
+            animation: slideInRight 0.8s ease-out;
         }
 
-        .section-title {
-            text-align: center;
-            font-size: 36px;
-            font-weight: 700;
-            color: #0A2540;
-            margin-bottom: 60px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 40px;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-            transition: all 0.3s;
-        }
-
-        .feature-card:hover {
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            transform: translateY(-4px);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
+        .restaurant-scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            margin-bottom: 20px;
         }
 
-        .feature-card:nth-child(1) .feature-icon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Animated Kitchen Elements */
+        .kitchen-element {
+            position: absolute;
+            font-size: 80px;
+            animation: float 3s ease-in-out infinite;
         }
 
-        .feature-card:nth-child(2) .feature-icon {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        .chef {
+            font-size: 120px;
+            z-index: 5;
+            animation: bounce 2s ease-in-out infinite;
         }
 
-        .feature-card:nth-child(3) .feature-icon {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        .order-1 {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
         }
 
-        .feature-card:nth-child(4) .feature-icon {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        .order-2 {
+            top: 15%;
+            right: 15%;
+            animation-delay: 0.5s;
         }
 
-        .feature-title {
-            font-size: 22px;
-            font-weight: 700;
+        .order-3 {
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 1s;
+        }
+
+        .order-4 {
+            bottom: 15%;
+            right: 10%;
+            animation-delay: 1.5s;
+        }
+
+        .sparkle {
+            position: absolute;
+            font-size: 30px;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .sparkle-1 { top: 20%; left: 30%; animation-delay: 0s; }
+        .sparkle-2 { top: 40%; right: 25%; animation-delay: 0.7s; }
+        .sparkle-3 { bottom: 30%; left: 20%; animation-delay: 1.4s; }
+
+        /* Floating Orders Background */
+        .floating-orders {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .order-card {
+            position: absolute;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
             color: #0A2540;
-            margin-bottom: 12px;
+            font-weight: 600;
+            animation: floatUpDown 4s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .feature-desc {
+        .order-card-1 {
+            top: 5%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .order-card-2 {
+            top: 30%;
+            right: 8%;
+            animation-delay: 1s;
+        }
+
+        .order-card-3 {
+            bottom: 10%;
+            left: 8%;
+            animation-delay: 2s;
+        }
+
+        /* Animations */
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0px) scale(1);
+            }
+            50% {
+                transform: translateY(-15px) scale(1.05);
+            }
+        }
+
+        @keyframes sparkle {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes floatUpDown {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-30px);
+            }
+        }
+
+        /* Stats Section */
+        .stats-section {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 48px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .stat-item p {
             font-size: 16px;
-            color: #425466;
-            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
         }
 
         /* Tech Stack */
@@ -207,8 +342,8 @@
             margin: 0 auto 80px;
             padding: 60px 40px;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .tech-stack h3 {
@@ -229,30 +364,40 @@
         }
 
         .tech-badge {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 12px 24px;
             border-radius: 8px;
             font-size: 15px;
-            font-weight: 500;
-            color: #0A2540;
-            border: 1px solid #e0e6eb;
+            font-weight: 600;
         }
 
         /* Footer */
         footer {
             text-align: center;
             padding: 40px;
-            color: #425466;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 14px;
         }
 
         @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                min-height: auto;
+            }
+
             .hero h1 {
                 font-size: 42px;
             }
 
-            .features-grid {
+            .hero-animation {
+                height: 400px;
+            }
+
+            .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 30px;
             }
 
             .cta-buttons {
@@ -278,42 +423,66 @@
     </nav>
 
     <section class="hero">
-        <h1>Kitchen Display System<br>Built for Speed</h1>
-        <p class="tagline">Real-time order management powered by hybrid architecture. Java-speed backend meets modern web interface.</p>
-        
-        <div class="cta-buttons">
-            <a href="/billing.html" class="btn btn-primary">
-                <span>Open Billing Station</span>
-                <span>→</span>
-            </a>
-            <a href="/kitchen.html" class="btn btn-secondary">
-                <span>View Kitchen Display</span>
-            </a>
+        <div class="hero-content">
+            <h1>Kitchen Display System Built for Speed</h1>
+            <p class="tagline">Real-time order management powered by hybrid architecture. Smart prioritization meets instant updates.</p>
+            
+            <div class="cta-buttons">
+                <a href="/billing.html" class="btn btn-primary">
+                    <span>Start Taking Orders</span>
+                    <span>→</span>
+                </a>
+                <a href="/kitchen.html" class="btn btn-secondary">
+                    <span>View Kitchen Display</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-animation">
+            <div class="restaurant-scene">
+                <!-- Floating order cards -->
+                <div class="floating-orders">
+                    <div class="order-card order-card-1">
+                        <span>🍕</span> Order #101
+                    </div>
+                    <div class="order-card order-card-2">
+                        <span>🍔</span> Order #102
+                    </div>
+                    <div class="order-card order-card-3">
+                        <span>🥗</span> Order #103
+                    </div>
+                </div>
+
+                <!-- Main chef character -->
+                <div class="chef">👨‍🍳</div>
+
+                <!-- Food items floating around -->
+                <div class="kitchen-element order-1">🍕</div>
+                <div class="kitchen-element order-2">🍔</div>
+                <div class="kitchen-element order-3">🍝</div>
+                <div class="kitchen-element order-4">🥗</div>
+
+                <!-- Sparkles -->
+                <div class="sparkle sparkle-1">✨</div>
+                <div class="sparkle sparkle-2">✨</div>
+                <div class="sparkle sparkle-3">✨</div>
+            </div>
         </div>
     </section>
 
-    <section class="features">
-        <h2 class="section-title">Enterprise-Grade Features</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3 class="feature-title">Lightning Fast Queue</h3>
-                <p class="feature-desc">Custom doubly-linked list implementation in Java provides O(1) insertion and removal for maximum throughput.</p>
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>O(1)</h3>
+                <p>VIP Order Insertion</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">⭐</div>
-                <h3 class="feature-title">Smart Prioritization</h3>
-                <p class="feature-desc">VIP and Express orders automatically jump the queue while maintaining fair prep-time ordering for standard orders.</p>
+            <div class="stat-item">
+                <h3>1s</h3>
+                <p>Real-Time Updates</p>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔄</div>
-                <h3 class="feature-title">Real-Time Sync</h3>
-                <p class="feature-desc">Live updates across all connected displays. Every action is instantly reflected kitchen-wide.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">💾</div>
-                <h3 class="feature-title">Cloud Persistence</h3>
-                <p class="feature-desc">Firebase Firestore integration ensures zero data loss with automatic state rehydration on restart.</p>
+            <div class="stat-item">
+                <h3>100%</h3>
+                <p>Data Persistence</p>
             </div>
         </div>
     </section>
@@ -324,8 +493,8 @@
             <span class="tech-badge">Java Backend</span>
             <span class="tech-badge">Node.js + Express</span>
             <span class="tech-badge">Firebase Firestore</span>
-            <span class="tech-badge">WebSockets</span>
-            <span class="tech-badge">Hybrid Architecture</span>
+            <span class="tech-badge">Doubly Linked List</span>
+            <span class="tech-badge">Real-Time Sync</span>
         </div>
     </section>
 

@@ -383,9 +383,10 @@
         </div>
 
         <div class="period-selector">
-            <button class="period-btn active" onclick="loadAnalytics('today')">Today</button>
+            <button class="period-btn" onclick="loadAnalytics('today')">Today</button>
             <button class="period-btn" onclick="loadAnalytics('week')">This Week</button>
             <button class="period-btn" onclick="loadAnalytics('month')">This Month</button>
+            <button class="period-btn active" onclick="loadAnalytics('all')">All Time</button>
         </div>
 
         <div class="stats-grid">
@@ -504,7 +505,7 @@
     </div>
 
     <script>
-        let currentPeriod = 'today';
+        let currentPeriod = 'all';
 
         async function loadAnalytics(period = 'today') {
             currentPeriod = period;
@@ -516,14 +517,33 @@
             event?.target?.classList.add('active');
 
             try {
+                console.log(`Loading analytics for period: ${period}`);
                 const response = await fetch(`/api/analytics?period=${period}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log('Analytics data received:', data);
+                console.log(`  - Total orders: ${data.orders.length}`);
+                console.log(`  - Stats:`, data.stats);
 
                 updateStats(data.stats);
                 updateCharts(data.stats, data.orders.length);
                 updateOrdersTable(data.orders);
             } catch (error) {
                 console.error('Error loading analytics:', error);
+                document.getElementById('ordersTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div>
+                                <h3>Error loading data</h3>
+                                <p>${error.message}</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
             }
         }
 
@@ -592,17 +612,29 @@
                                      order.isExpress ? '<span class="priority-badge priority-express">⚡ Express</span>' :
                                      '<span class="priority-badge">Normal</span>';
 
-                const timestamp = order.timestamp?.toDate ? 
-                    order.timestamp.toDate().toLocaleString() : 
-                    new Date(order.timestamp?._seconds * 1000).toLocaleString();
+                // Handle different timestamp formats
+                let timestamp = 'N/A';
+                try {
+                    if (order.timestamp?._seconds) {
+                        timestamp = new Date(order.timestamp._seconds * 1000).toLocaleString();
+                    } else if (order.timestamp?.toDate) {
+                        timestamp = order.timestamp.toDate().toLocaleString();
+                    } else if (typeof order.timestamp === 'number') {
+                        timestamp = new Date(order.timestamp).toLocaleString();
+                    } else if (order.timestamp) {
+                        timestamp = new Date(order.timestamp).toLocaleString();
+                    }
+                } catch (e) {
+                    console.error('Error parsing timestamp for order', order.id, e);
+                }
 
                 return `
                     <tr>
                         <td><strong>#${order.id}</strong></td>
-                        <td>${order.items}</td>
+                        <td>${order.items || 'N/A'}</td>
                         <td>${priorityBadge}</td>
-                        <td>${order.prepTime} min</td>
-                        <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                        <td>${order.prepTime || 0} min</td>
+                        <td><span class="status-badge ${statusClass}">${order.status || 'UNKNOWN'}</span></td>
                         <td>${timestamp}</td>
                     </tr>
                 `;
@@ -610,7 +642,7 @@
         }
 
         // Load analytics on page load
-        loadAnalytics('today');
+        loadAnalytics('all');
 
         // Auto-refresh every 30 seconds
         setInterval(() => loadAnalytics(currentPeriod), 30000);
