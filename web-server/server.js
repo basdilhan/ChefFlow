@@ -80,15 +80,28 @@ function sendToJava(command) {
  */
 async function rehydrateQueue() {
     try {
+        // Fetch all pending orders (no orderBy to avoid index requirement)
         const snapshot = await ordersCollection
             .where('status', '==', 'PENDING')
-            .orderBy('timestamp', 'asc')
             .get();
         
         console.log(`Rehydrating ${snapshot.size} pending orders...`);
         
+        // Convert to array and sort by timestamp in JavaScript
+        const orders = [];
         snapshot.forEach((doc) => {
-            const order = doc.data();
+            orders.push(doc.data());
+        });
+        
+        // Sort: VIP first, then by timestamp
+        orders.sort((a, b) => {
+            if (a.isVip && !b.isVip) return -1;
+            if (!a.isVip && b.isVip) return 1;
+            return a.timestamp - b.timestamp;
+        });
+        
+        // Send to Java in sorted order
+        orders.forEach((order) => {
             const command = order.isVip 
                 ? `VIP,${order.id},${order.items},${order.prepTime},${order.isExpress || false}`
                 : `ADD,${order.id},${order.items},${order.prepTime},${order.isExpress || false}`;
@@ -314,6 +327,45 @@ app.get('/all-orders', async (req, res) => {
 /**
  * Start the server
  */
+// Periodic sync to detect orders added from other servers
+let lastSyncTimestamp = Date.now();
+
+async function syncWithDatabase() {
+    try {
+        const snapshot = await ordersCollection
+            .where('status', '==', 'PENDING')
+            .where('timestamp', '>', lastSyncTimestamp)
+            .get();
+        
+        if (!snapshot.empty) {
+            console.log(`Syncing ${snapshot.size} new orders from other servers...`);
+            
+            const orders = [];
+            snapshot.forEach((doc) => {
+                orders.push(doc.data());
+            });
+            
+            orders.sort((a, b) => a.timestamp - b.timestamp);
+            
+            orders.forEach((order) => {
+                // Check if order already exists in current queue
+                const exists = currentQueue.some(q => q.id === order.id);
+                if (!exists) {
+                    const command = order.isVip 
+                        ? `VIP,${order.id},${order.items},${order.prepTime},${order.isExpress || false}`
+                        : `ADD,${order.id},${order.items},${order.prepTime},${order.isExpress || false}`;
+                    
+                    sendToJava(command);
+                }
+            });
+        }
+        
+        lastSyncTimestamp = Date.now();
+    } catch (error) {
+        console.error('Error syncing with database:', error);
+    }
+}
+
 async function startServer() {
     try {
         console.log('Starting Java backend...');
@@ -326,7 +378,12 @@ async function startServer() {
             console.log(`ChefFlow V2 server running on http://localhost:${PORT}`);
             console.log('Billing: http://localhost:3000/billing.html');
             console.log('Kitchen: http://localhost:3000/kitchen.html');
+            console.log('Multi-device sync enabled (checking every 5 seconds)');
         });
+        
+        // Sync with database every 5 seconds to detect orders from other servers
+        setInterval(syncWithDatabase, 5000);
+        
     } catch (error) {
         console.error('Failed to start server:', error);
         process.exit(1);
