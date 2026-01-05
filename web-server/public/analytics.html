@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChefFlow V2 - Analytics & History</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background: #f8f9fa;
+            color: #0A2540;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        nav .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A2540;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #425466;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #667eea;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #0A2540;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            color: #425466;
+        }
+
+        /* Period Selector */
+        .period-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .period-btn {
+            padding: 10px 24px;
+            background: white;
+            border: 2px solid #e0e6eb;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #425466;
+        }
+
+        .period-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .period-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card:nth-child(1)::before {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card:nth-child(2)::before {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .stat-card:nth-child(3)::before {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card:nth-child(4)::before {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #425466;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #0A2540;
+            margin-bottom: 8px;
+        }
+
+        .stat-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        .chart-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0A2540;
+            margin-bottom: 20px;
+        }
+
+        /* Order History Table */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 24px 30px;
+            border-bottom: 1px solid #e0e6eb;
+        }
+
+        .table-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0A2540;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 16px 30px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #425466;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 20px 30px;
+            border-top: 1px solid #e0e6eb;
+            color: #0A2540;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-cancelled {
+            background: #fee;
+            color: #dc3545;
+        }
+
+        .status-pending {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .priority-vip {
+            color: #dc3545;
+        }
+
+        .priority-express {
+            color: #fbbf24;
+        }
+
+        /* Distribution Chart */
+        .distribution-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .distribution-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .distribution-bar {
+            flex: 1;
+            height: 32px;
+            border-radius: 6px;
+            background: #e0e6eb;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .distribution-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+
+        .distribution-label {
+            min-width: 100px;
+            font-weight: 600;
+            color: #425466;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">
+                <span>🍳</span>
+                <span>ChefFlow V2</span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/billing.html">Billing</a>
+                <a href="/kitchen.html">Kitchen</a>
+                <a href="/analytics.html" class="active">Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>📊 Analytics & Order History</h1>
+            <p>Track performance metrics and review order history</p>
+        </div>
+
+        <div class="period-selector">
+            <button class="period-btn active" onclick="loadAnalytics('today')">Today</button>
+            <button class="period-btn" onclick="loadAnalytics('week')">This Week</button>
+            <button class="period-btn" onclick="loadAnalytics('month')">This Month</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value" id="totalOrders">0</div>
+                <div class="stat-subtitle">All time orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Completed</div>
+                <div class="stat-value" id="completedOrders">0</div>
+                <div class="stat-subtitle"><span id="completionRate">0</span>% completion rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">VIP Orders</div>
+                <div class="stat-value" id="vipOrders">0</div>
+                <div class="stat-subtitle">Priority service</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Prep Time</div>
+                <div class="stat-value" id="avgPrepTime">0</div>
+                <div class="stat-subtitle">minutes per order</div>
+            </div>
+        </div>
+
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>Order Status Distribution</h3>
+                <div class="distribution-grid">
+                    <div class="distribution-item">
+                        <div class="distribution-label">Completed</div>
+                        <div class="distribution-bar">
+                            <div class="distribution-fill" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); width: 0%" id="completedBar">
+                                <span id="completedCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="distribution-item">
+                        <div class="distribution-label">Pending</div>
+                        <div class="distribution-bar">
+                            <div class="distribution-fill" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); width: 0%" id="pendingBar">
+                                <span id="pendingCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="distribution-item">
+                        <div class="distribution-label">Cancelled</div>
+                        <div class="distribution-bar">
+                            <div class="distribution-fill" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); width: 0%" id="cancelledBar">
+                                <span id="cancelledCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Priority Breakdown</h3>
+                <div class="distribution-grid">
+                    <div class="distribution-item">
+                        <div class="distribution-label">VIP</div>
+                        <div class="distribution-bar">
+                            <div class="distribution-fill" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); width: 0%" id="vipBar">
+                                <span id="vipBarCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="distribution-item">
+                        <div class="distribution-label">Express</div>
+                        <div class="distribution-bar">
+                            <div class="distribution-fill" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); width: 0%" id="expressBar">
+                                <span id="expressCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="distribution-item">
+                        <div class="distribution-label">Normal</div>
+                        <div class="distribution-bar">
+                            <div class="distribution-fill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 0%" id="normalBar">
+                                <span id="normalCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Recent Order History</h3>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Items</th>
+                            <th>Priority</th>
+                            <th>Prep Time</th>
+                            <th>Status</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <div>
+                                    <h3>Loading orders...</h3>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPeriod = 'today';
+
+        async function loadAnalytics(period = 'today') {
+            currentPeriod = period;
+            
+            // Update active button
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event?.target?.classList.add('active');
+
+            try {
+                const response = await fetch(`/api/analytics?period=${period}`);
+                const data = await response.json();
+
+                updateStats(data.stats);
+                updateCharts(data.stats, data.orders.length);
+                updateOrdersTable(data.orders);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalOrders').textContent = stats.totalOrders;
+            document.getElementById('completedOrders').textContent = stats.completedOrders;
+            document.getElementById('vipOrders').textContent = stats.vipOrders;
+            document.getElementById('avgPrepTime').textContent = stats.avgPrepTime;
+            document.getElementById('completionRate').textContent = stats.completionRate;
+        }
+
+        function updateCharts(stats, total) {
+            // Status distribution
+            const completedPct = total > 0 ? (stats.completedOrders / total * 100) : 0;
+            const pendingPct = total > 0 ? (stats.pendingOrders / total * 100) : 0;
+            const cancelledPct = total > 0 ? (stats.cancelledOrders / total * 100) : 0;
+
+            document.getElementById('completedBar').style.width = completedPct + '%';
+            document.getElementById('completedCount').textContent = stats.completedOrders;
+            
+            document.getElementById('pendingBar').style.width = pendingPct + '%';
+            document.getElementById('pendingCount').textContent = stats.pendingOrders;
+            
+            document.getElementById('cancelledBar').style.width = cancelledPct + '%';
+            document.getElementById('cancelledCount').textContent = stats.cancelledOrders;
+
+            // Priority breakdown
+            const vipPct = total > 0 ? (stats.vipOrders / total * 100) : 0;
+            const expressPct = total > 0 ? (stats.expressOrders / total * 100) : 0;
+            const normalCount = total - stats.vipOrders - stats.expressOrders;
+            const normalPct = total > 0 ? (normalCount / total * 100) : 0;
+
+            document.getElementById('vipBar').style.width = vipPct + '%';
+            document.getElementById('vipBarCount').textContent = stats.vipOrders;
+            
+            document.getElementById('expressBar').style.width = expressPct + '%';
+            document.getElementById('expressCount').textContent = stats.expressOrders;
+            
+            document.getElementById('normalBar').style.width = normalPct + '%';
+            document.getElementById('normalCount').textContent = normalCount;
+        }
+
+        function updateOrdersTable(orders) {
+            const tbody = document.getElementById('ordersTableBody');
+            
+            if (orders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div>
+                                <h3>No orders found</h3>
+                                <p>Orders will appear here once created</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = orders.map(order => {
+                const statusClass = order.status === 'COMPLETED' ? 'status-completed' : 
+                                   order.status === 'CANCELLED' ? 'status-cancelled' : 
+                                   'status-pending';
+                
+                const priorityBadge = order.isVip ? '<span class="priority-badge priority-vip">⭐ VIP</span>' :
+                                     order.isExpress ? '<span class="priority-badge priority-express">⚡ Express</span>' :
+                                     '<span class="priority-badge">Normal</span>';
+
+                const timestamp = order.timestamp?.toDate ? 
+                    order.timestamp.toDate().toLocaleString() : 
+                    new Date(order.timestamp?._seconds * 1000).toLocaleString();
+
+                return `
+                    <tr>
+                        <td><strong>#${order.id}</strong></td>
+                        <td>${order.items}</td>
+                        <td>${priorityBadge}</td>
+                        <td>${order.prepTime} min</td>
+                        <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                        <td>${timestamp}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Load analytics on page load
+        loadAnalytics('today');
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => loadAnalytics(currentPeriod), 30000);
+    </script>
+</body>
+</html>

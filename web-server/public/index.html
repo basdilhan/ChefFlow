@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChefFlow V2 - Modern Kitchen Display System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: #0A2540;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A2540;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #425466;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #0A2540;
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 40px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: 800;
+            color: #0A2540;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .hero .tagline {
+            font-size: 22px;
+            color: #425466;
+            margin-bottom: 50px;
+            font-weight: 400;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 80px;
+        }
+
+        .btn {
+            padding: 16px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6941a1 100%);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #0A2540;
+            border: 2px solid #e0e6eb;
+        }
+
+        .btn-secondary:hover {
+            border-color: #0A2540;
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features {
+            max-width: 1200px;
+            margin: 0 auto 100px;
+            padding: 0 40px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: #0A2540;
+            margin-bottom: 60px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card:nth-child(1) .feature-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .feature-card:nth-child(2) .feature-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .feature-card:nth-child(3) .feature-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .feature-card:nth-child(4) .feature-icon {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .feature-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0A2540;
+            margin-bottom: 12px;
+        }
+
+        .feature-desc {
+            font-size: 16px;
+            color: #425466;
+            line-height: 1.6;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            max-width: 1200px;
+            margin: 0 auto 80px;
+            padding: 60px 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        .tech-stack h3 {
+            text-align: center;
+            font-size: 20px;
+            color: #425466;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tech-badges {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tech-badge {
+            background: #f8f9fa;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #0A2540;
+            border: 1px solid #e0e6eb;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #425466;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 42px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <div class="logo">
+                <span>🍳</span>
+                <span>ChefFlow V2</span>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/billing.html">Billing</a>
+                <a href="/kitchen.html">Kitchen</a>
+                <a href="/analytics.html">Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Kitchen Display System<br>Built for Speed</h1>
+        <p class="tagline">Real-time order management powered by hybrid architecture. Java-speed backend meets modern web interface.</p>
+        
+        <div class="cta-buttons">
+            <a href="/billing.html" class="btn btn-primary">
+                <span>Open Billing Station</span>
+                <span>→</span>
+            </a>
+            <a href="/kitchen.html" class="btn btn-secondary">
+                <span>View Kitchen Display</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2 class="section-title">Enterprise-Grade Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Lightning Fast Queue</h3>
+                <p class="feature-desc">Custom doubly-linked list implementation in Java provides O(1) insertion and removal for maximum throughput.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⭐</div>
+                <h3 class="feature-title">Smart Prioritization</h3>
+                <p class="feature-desc">VIP and Express orders automatically jump the queue while maintaining fair prep-time ordering for standard orders.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3 class="feature-title">Real-Time Sync</h3>
+                <p class="feature-desc">Live updates across all connected displays. Every action is instantly reflected kitchen-wide.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💾</div>
+                <h3 class="feature-title">Cloud Persistence</h3>
+                <p class="feature-desc">Firebase Firestore integration ensures zero data loss with automatic state rehydration on restart.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="tech-stack">
+        <h3>Powered By Modern Technology</h3>
+        <div class="tech-badges">
+            <span class="tech-badge">Java Backend</span>
+            <span class="tech-badge">Node.js + Express</span>
+            <span class="tech-badge">Firebase Firestore</span>
+            <span class="tech-badge">WebSockets</span>
+            <span class="tech-badge">Hybrid Architecture</span>
+        </div>
+    </section>
+
+    <footer>
+        <p>ChefFlow V2 © 2026 — Professional Kitchen Management System</p>
+    </footer>
+</body>
+</html>

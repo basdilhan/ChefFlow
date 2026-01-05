@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChefFlow V2 - Kitchen Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background: #121212;
+            color: #e0e0e0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            padding: 24px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #10b981;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.95); }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .complete-btn {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .sound-btn {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sound-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .sound-btn.muted {
+            opacity: 0.5;
+        }
+
+        .complete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .complete-btn:disabled {
+            background: #374151;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .nav-link {
+            color: #9ca3af;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: white;
+        }
+
+        /* Stats HUD */
+        .stats-hud {
+            background: #1e1e2e;
+            padding: 30px 40px;
+            border-bottom: 1px solid #2d2d44;
+        }
+
+        .stats-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #2d2d44 0%, #1e1e2e 100%);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #3f3f5a;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.total {
+            background: rgba(99, 102, 241, 0.2);
+            color: #6366f1;
+        }
+
+        .stat-icon.vip {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .stat-icon.time {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .queue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        /* Order Cards */
+        .order-card {
+            background: #1e1e2e;
+            border-radius: 12px;
+            padding: 24px;
+            border: 2px solid #2d2d44;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .order-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .order-card.selected {
+            border-color: #6366f1;
+            box-shadow: 0 0 32px rgba(99, 102, 241, 0.4);
+            transform: scale(1.02);
+        }
+
+        .order-card.active {
+            border-color: #10b981;
+            box-shadow: 0 0 32px rgba(16, 185, 129, 0.4);
+        }
+
+        .order-card.active::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(8px);
+        }
+
+        .order-card.vip {
+            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+            border-left: 5px solid #ef4444;
+        }
+
+        .order-card.express {
+            background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+            border-left: 5px solid #fbbf24;
+            color: #fef3c7;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .order-id {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .order-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.active {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge.vip {
+            background: #ef4444;
+            color: white;
+        }
+
+        .badge.express {
+            background: #fbbf24;
+            color: #78350f;
+        }
+
+        .order-items {
+            font-size: 17px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: white;
+            line-height: 1.5;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prep-time {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .cancel-btn {
+            padding: 8px 16px;
+            background: transparent;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cancel-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            background: #1e1e2e;
+            border-radius: 12px;
+            border: 2px dashed #2d2d44;
+        }
+
+        .empty-state h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            color: #4b5563;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            color: #6b7280;
+        }
+
+        /* Message Notification */
+        .message {
+            position: fixed;
+            top: 100px;
+            right: 40px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .message.success {
+            background: #10b981;
+            color: white;
+            display: block;
+        }
+
+        .message.error {
+            background: #ef4444;
+            color: white;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .queue-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1>🍳 Kitchen Display</h1>
+                <span class="status-live">
+                    <span class="status-dot"></span>
+                    <span>LIVE</span>
+                </span>
+            </div>
+            <div class="header-actions">
+                <button class="sound-btn" id="soundToggle" onclick="toggleSound()" title="Toggle Sound Notifications">
+                    <span id="soundIcon">🔊</span>
+                </button>
+                <button class="complete-btn" id="completeBtn" onclick="completeSelectedOrder()">
+                    ✓ Complete Selected Order
+                </button>
+                <a href="/analytics.html" class="nav-link">Analytics</a>
+                <a href="/billing.html" class="nav-link">Go to Billing</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="stats-hud">
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon total">📋</div>
+                <div class="stat-info">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-number" id="totalOrders">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon vip">⭐</div>
+                <div class="stat-info">
+                    <div class="stat-label">VIP Priority</div>
+                    <div class="stat-number" id="vipOrders">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon time">⏱️</div>
+                <div class="stat-info">
+                    <div class="stat-label">Total Minutes</div>
+                    <div class="stat-number" id="totalTime">0</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <div id="queueContainer" class="queue-grid"></div>
+    </main>
+
+    <div id="message" class="message"></div>
+
+    <script>
+        let currentQueue = [];
+        let selectedOrderId = null;
+        let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+        let previousQueueSize = 0;
+        let previousVipCount = 0;
+
+        // Sound notification system
+        const sounds = {
+            newOrder: () => playBeep(800, 200, 0.3),
+            vipOrder: () => {
+                playBeep(1000, 150, 0.4);
+                setTimeout(() => playBeep(1200, 150, 0.4), 200);
+            },
+            completed: () => playBeep(600, 300, 0.25)
+        };
+
+        function playBeep(frequency, duration, volume) {
+            if (!soundEnabled) return;
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration / 1000);
+            } catch (error) {
+                console.error('Sound playback error:', error);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('soundEnabled', soundEnabled);
+            
+            const icon = document.getElementById('soundIcon');
+            const btn = document.getElementById('soundToggle');
+            
+            if (soundEnabled) {
+                icon.textContent = '🔊';
+                btn.classList.remove('muted');
+                sounds.completed();
+            } else {
+                icon.textContent = '🔇';
+                btn.classList.add('muted');
+            }
+        }
+
+        // Initialize sound button state
+        window.addEventListener('load', () => {
+            const icon = document.getElementById('soundIcon');
+            const btn = document.getElementById('soundToggle');
+            if (!soundEnabled) {
+                icon.textContent = '🔇';
+                btn.classList.add('muted');
+            }
+        });
+
+        // Select an order
+        function selectOrder(orderId) {
+            selectedOrderId = orderId;
+            renderQueue();
+        }
+
+        // Fetch live queue every second
+        async function fetchQueue() {
+            try {
+                const response = await fetch('/live-queue');
+                const data = await response.json();
+                currentQueue = data.queue || [];
+                renderQueue();
+            } catch (error) {
+                console.error('Error fetching queue:', error);
+            }
+        }
+
+        // Render the queue on the page
+        function renderQueue() {
+            const container = document.getElementById('queueContainer');
+            
+            // Check for new orders and play sounds
+            if (currentQueue.length > previousQueueSize) {
+                const newVipCount = currentQueue.filter(o => o.isVip).length;
+                if (newVipCount > previousVipCount) {
+                    sounds.vipOrder();
+                } else {
+                    sounds.newOrder();
+                }
+            }
+            
+            previousQueueSize = currentQueue.length;
+            previousVipCount = currentQueue.filter(o => o.isVip).length;
+            
+            if (currentQueue.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h2>✓ All Clear</h2>
+                        <p>No orders in the queue</p>
+                    </div>
+                `;
+                document.getElementById('completeBtn').disabled = true;
+                updateStats();
+                return;
+            }
+
+            document.getElementById('completeBtn').disabled = !selectedOrderId;
+
+            container.innerHTML = currentQueue.map((order, index) => {
+                const isActive = index === 0;
+                const isSelected = selectedOrderId === order.id;
+                
+                let cardClasses = ['order-card'];
+                if (order.isVip) cardClasses.push('vip');
+                else if (order.isExpress) cardClasses.push('express');
+                if (isActive) cardClasses.push('active');
+                if (isSelected) cardClasses.push('selected');
+                
+                return `
+                    <div class="${cardClasses.join(' ')}" onclick="selectOrder(${order.id})">
+                        <div class="order-header">
+                            <div class="order-id">#${order.id}</div>
+                            <div class="order-badges">
+                                ${isActive ? '<span class="badge active">🔥 ACTIVE</span>' : ''}
+                                ${order.isVip ? '<span class="badge vip">⭐ VIP</span>' : ''}
+                                ${order.isExpress && !order.isVip ? '<span class="badge express">⚡ EXPRESS</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            ${order.items}
+                        </div>
+                        <div class="order-footer">
+                            <div class="prep-time">
+                                <span>⏱️</span>
+                                <span>${order.prepTime} min</span>
+                            </div>
+                            <button class="cancel-btn" onclick="event.stopPropagation(); cancelOrder(${order.id})">
+                                ✕ Cancel
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateStats();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = currentQueue.length;
+            const vip = currentQueue.filter(o => o.isVip).length;
+            const time = currentQueue.reduce((sum, o) => sum + o.prepTime, 0);
+
+            document.getElementById('totalOrders').textContent = total;
+            document.getElementById('vipOrders').textContent = vip;
+            document.getElementById('totalTime').textContent = time;
+        }
+
+        // Complete the selected order
+        async function completeSelectedOrder() {
+            if (!selectedOrderId) {
+                showMessage('⚠ Please select an order first', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/complete-selected-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: selectedOrderId })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage('✓ Order #' + result.orderId + ' completed!', 'success');
+                    sounds.completed();
+                    selectedOrderId = null;
+                    fetchQueue();
+                } else {
+                    showMessage('✗ Error: ' + (result.error || 'Failed to complete order'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('✗ Network error', 'error');
+            }
+        }
+
+        // Cancel a specific order
+        async function cancelOrder(orderId) {
+            if (!confirm(`Cancel order #${orderId}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/cancel-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: orderId })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage('✓ Order #' + orderId + ' cancelled', 'success');
+                    if (selectedOrderId === orderId) {
+                        selectedOrderId = null;
+                    }
+                    fetchQueue();
+                } else {
+                    showMessage('✗ Error: ' + (result.error || 'Failed to cancel order'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('✗ Network error', 'error');
+            }
+        }
+
+        // Show message notification
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 3000);
+        }
+
+        // Poll for updates every 1 second
+        setInterval(fetchQueue, 1000);
+
+        // Initial fetch
+        fetchQueue();
+    </script>
+</body>
+</html>

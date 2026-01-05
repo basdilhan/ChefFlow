@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChefFlow V2 - Billing Station</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        nav .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A2540;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: #425466;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #0A2540;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #0A2540;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: #425466;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #0A2540;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e6eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #0A2540;
+            box-shadow: 0 0 0 3px rgba(10, 37, 64, 0.1);
+        }
+
+        .helper-text {
+            font-size: 13px;
+            color: #425466;
+            margin-top: 6px;
+        }
+
+        /* Toggle Switches */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-group:hover {
+            background: #e9ecef;
+        }
+
+        .toggle-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .toggle-icon.vip {
+            background: #fee;
+            color: #dc3545;
+        }
+
+        .toggle-icon.express {
+            background: #fffbeb;
+            color: #fbbf24;
+        }
+
+        .toggle-label {
+            flex: 1;
+        }
+
+        .toggle-label h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0A2540;
+            margin-bottom: 2px;
+        }
+
+        .toggle-label p {
+            font-size: 13px;
+            color: #425466;
+        }
+
+        /* iOS-style Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #0A2540;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6941a1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Message */
+        .message {
+            padding: 14px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .message.error {
+            background: #fee;
+            color: #dc3545;
+            display: block;
+        }
+
+        .sidebar h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0A2540;
+            margin-bottom: 20px;
+        }
+
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .quick-btn {
+            padding: 14px 20px;
+            border: 2px solid #e0e6eb;
+            background: white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #0A2540;
+        }
+
+        .quick-btn:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+            transform: translateX(4px);
+        }
+
+        .quick-btn span:first-child {
+            font-size: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .stat-box:nth-child(2) {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tips-section {
+            background: #fffbeb;
+            padding: 16px;
+            border-radius: 10px;
+            border-left: 4px solid #fbbf24;
+        }
+
+        .tips-section h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+
+        .tips-section ul {
+            list-style: none;
+            font-size: 13px;
+            color: #78350f;
+        }
+
+        .tips-section li {
+            margin-bottom: 6px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .tips-section li:before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">
+                <span>🍳</span>
+                <span>ChefFlow V2</span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/billing.html">Billing</a>
+                <a href="/kitchen.html">Kitchen</a>
+                <a href="/analytics.html">Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>Billing Station</h1>
+                <p>Create and submit new orders</p>
+            </div>
+
+            <form id="orderForm">
+                <div class="form-group">
+                    <label for="orderId">Order ID</label>
+                    <input type="number" id="orderId" name="orderId" required min="1" 
+                           placeholder="Auto-generated order number">
+                    <p class="helper-text">Unique identifier for this order</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="items">Order Items</label>
+                    <input type="text" id="items" name="items" required 
+                           placeholder="e.g., Burger with Fries, Iced Tea">
+                    <p class="helper-text">Describe the items in this order</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="prepTime">Preparation Time (minutes)</label>
+                    <input type="number" id="prepTime" name="prepTime" required min="1" max="120"
+                           placeholder="Estimated cooking time">
+                    <p class="helper-text">Expected time to prepare this order</p>
+                </div>
+
+                <div class="form-group">
+                    <label>Priority Options</label>
+                    
+                    <div class="toggle-group" onclick="document.getElementById('isVip').click()">
+                        <div class="toggle-info">
+                            <div class="toggle-icon vip">🔥</div>
+                            <div class="toggle-label">
+                                <h3>VIP Priority</h3>
+                                <p>Moves to the front of the queue</p>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="isVip" name="isVip" aria-label="VIP Priority">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-group" onclick="document.getElementById('isExpress').click()">
+                        <div class="toggle-info">
+                            <div class="toggle-icon express">⚡</div>
+                            <div class="toggle-label">
+                                <h3>Express Service</h3>
+                                <p>Fast-track after VIP orders</p>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="isExpress" name="isExpress" aria-label="Express Service">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Order</button>
+            </form>
+
+            <div id="message" class="message"></div>
+        </div>
+
+        <div class="sidebar">
+            <h3>📊 Today's Stats</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number" id="todayOrders">0</div>
+                    <div class="stat-label">Orders Today</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="vipCount">0</div>
+                    <div class="stat-label">VIP Orders</div>
+                </div>
+            </div>
+
+            <h3>⚡ Quick Actions</h3>
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="setQuickOrder('Burger Combo', 12)">
+                    <span>🍔</span>
+                    <span>Burger Combo (12 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Pizza Special', 18)">
+                    <span>🍕</span>
+                    <span>Pizza Special (18 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Pasta Deluxe', 15)">
+                    <span>🍝</span>
+                    <span>Pasta Deluxe (15 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Salad Bowl', 8)">
+                    <span>🥗</span>
+                    <span>Salad Bowl (8 min)</span>
+                </button>
+            </div>
+
+            <div class="tips-section">
+                <h4>💡 Pro Tips</h4>
+                <ul>
+                    <li>Use VIP for urgent orders</li>
+                    <li>Express for quick service</li>
+                    <li>Check kitchen display often</li>
+                    <li>Keep order IDs sequential</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('orderForm');
+        const messageDiv = document.getElementById('message');
+        let orderCount = 0;
+        let vipOrderCount = 0;
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/live-queue');
+                const data = await response.json();
+                const queue = data.queue || [];
+                
+                document.getElementById('todayOrders').textContent = orderCount;
+                document.getElementById('vipCount').textContent = vipOrderCount;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Quick order presets
+        function setQuickOrder(itemName, prepTime) {
+            document.getElementById('items').value = itemName;
+            document.getElementById('prepTime').value = prepTime;
+            document.getElementById('items').focus();
+        }
+
+        // Update stats every 5 seconds
+        setInterval(loadStats, 5000);
+        loadStats();
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                id: parseInt(document.getElementById('orderId').value),
+                items: document.getElementById('items').value.trim(),
+                prepTime: parseInt(document.getElementById('prepTime').value),
+                isVip: document.getElementById('isVip').checked,
+                isExpress: document.getElementById('isExpress').checked
+            };
+
+            try {
+                const response = await fetch('/add-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage('✓ Order #' + formData.id + ' submitted successfully', 'success');
+                    
+                    // Update stats
+                    orderCount++;
+                    if (formData.isVip) vipOrderCount++;
+                    loadStats();
+                    
+                    // Reset form
+                    form.reset();
+                } else {
+                    showMessage('✗ Error: ' + (result.error || 'Failed to submit order'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('✗ Network error: Could not connect to server', 'error');
+            }
+        });
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            
+            setTimeout(() => {
+                messageDiv.className = 'message';
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
