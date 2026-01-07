@@ -300,14 +300,14 @@
         }
 
         .quick-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
             margin-bottom: 30px;
         }
 
         .quick-btn {
-            padding: 14px 20px;
+            padding: 12px 16px;
             border: 2px solid #e0e6eb;
             background: white;
             border-radius: 8px;
@@ -316,15 +316,19 @@
             transition: all 0.3s;
             text-align: left;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 6px;
             color: #0A2540;
+            font-size: 13px;
         }
 
         .quick-btn:hover {
             border-color: #667eea;
             background: #f8f9fa;
-            transform: translateX(4px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
 
         .quick-btn span:first-child {
@@ -491,35 +495,79 @@
         </div>
 
         <div class="sidebar">
-            <h3>📊 Today's Stats</h3>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-number" id="todayOrders">0</div>
-                    <div class="stat-label">Orders Today</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number" id="vipCount">0</div>
-                    <div class="stat-label">VIP Orders</div>
-                </div>
-            </div>
-
             <h3>⚡ Quick Actions</h3>
             <div class="quick-actions">
-                <button class="quick-btn" onclick="setQuickOrder('Burger Combo', 12)">
-                    <span>🍔</span>
-                    <span>Burger Combo (12 min)</span>
+                <button class="quick-btn" onclick="setQuickOrder('Chicken Kottu', 18)">
+                    <span>🍛</span>
+                    <span>Chicken Kottu (18 min)</span>
                 </button>
-                <button class="quick-btn" onclick="setQuickOrder('Pizza Special', 18)">
+                <button class="quick-btn" onclick="setQuickOrder('Beef Kottu', 20)">
+                    <span>🍛</span>
+                    <span>Beef Kottu (20 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Mixed Kottu', 19)">
+                    <span>🍛</span>
+                    <span>Mixed Kottu (19 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Chicken Biryani', 22)">
+                    <span>🍚</span>
+                    <span>Chicken Biryani (22 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Beef Biryani', 24)">
+                    <span>🍚</span>
+                    <span>Beef Biryani (24 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Vegetable Biryani', 20)">
+                    <span>🍚</span>
+                    <span>Vegetable Biryani (20 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Chicken Fried Rice', 15)">
+                    <span>🍚</span>
+                    <span>Chicken Fried Rice (15 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Beef Fried Rice', 16)">
+                    <span>🍚</span>
+                    <span>Beef Fried Rice (16 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Mixed Fried Rice', 17)">
+                    <span>🍚</span>
+                    <span>Mixed Fried Rice (17 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Cheese Pizza', 18)">
                     <span>🍕</span>
-                    <span>Pizza Special (18 min)</span>
+                    <span>Cheese Pizza (18 min)</span>
                 </button>
-                <button class="quick-btn" onclick="setQuickOrder('Pasta Deluxe', 15)">
+                <button class="quick-btn" onclick="setQuickOrder('Chicken Pizza', 20)">
+                    <span>🍕</span>
+                    <span>Chicken Pizza (20 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Beef Burger', 12)">
+                    <span>🍔</span>
+                    <span>Beef Burger (12 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Chicken Burger', 12)">
+                    <span>🍔</span>
+                    <span>Chicken Burger (12 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Chicken Pasta', 15)">
                     <span>🍝</span>
-                    <span>Pasta Deluxe (15 min)</span>
+                    <span>Chicken Pasta (15 min)</span>
                 </button>
-                <button class="quick-btn" onclick="setQuickOrder('Salad Bowl', 8)">
+                <button class="quick-btn" onclick="setQuickOrder('Beef Pasta', 16)">
+                    <span>🍝</span>
+                    <span>Beef Pasta (16 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Caesar Salad', 8)">
                     <span>🥗</span>
-                    <span>Salad Bowl (8 min)</span>
+                    <span>Caesar Salad (8 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Grilled Chicken Salad', 10)">
+                    <span>🥗</span>
+                    <span>Grilled Chicken Salad (10 min)</span>
+                </button>
+                <button class="quick-btn" onclick="setQuickOrder('Mixed Grill Platter', 28)">
+                    <span>🍖</span>
+                    <span>Mixed Grill Platter (28 min)</span>
                 </button>
             </div>
 
