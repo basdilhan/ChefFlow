@@ -580,13 +580,14 @@
         // Fetch live queue every second
         async function fetchQueue() {
             try {
-                const response = await fetch('/api/analytics?period=today');
+                // Fetch ALL orders (not just today) to match analytics
+                const response = await fetch('/api/analytics?period=all');
                 const data = await response.json();
                 
-                // Filter to show pending orders + recently completed (last 30 min) + processing
+                // Filter to show pending orders + recently completed (last 30 min)
                 const thirtyMinutesAgo = Date.now() - (30 * 60 * 1000);
                 const kitchenOrders = data.orders.filter(order => {
-                    // Always show pending orders
+                    // Always show pending orders (regardless of when they were created)
                     if (order.status === 'PENDING') return true;
                     
                     // Show completed orders from last 30 minutes
@@ -599,6 +600,31 @@
                     }
                     
                     return false;
+                });
+                
+                // Sort orders by priority and prep time
+                // Priority: VIP > Pickup > Normal
+                // Within each priority: shorter prep time first
+                kitchenOrders.sort((a, b) => {
+                    // Completed orders go to the end
+                    if (a.status === 'COMPLETED' && b.status !== 'COMPLETED') return 1;
+                    if (a.status !== 'COMPLETED' && b.status === 'COMPLETED') return -1;
+                    
+                    // VIP orders come first
+                    if (a.isVip && !b.isVip) return -1;
+                    if (!a.isVip && b.isVip) return 1;
+                    
+                    // If both VIP, sort by prep time (shortest first)
+                    if (a.isVip && b.isVip) {
+                        return (a.prepTime || 0) - (b.prepTime || 0);
+                    }
+                    
+                    // Pickup orders come before normal
+                    if (a.isExpress && !b.isExpress) return -1;
+                    if (!a.isExpress && b.isExpress) return 1;
+                    
+                    // If both pickup or both normal, sort by prep time (shortest first)
+                    return (a.prepTime || 0) - (b.prepTime || 0);
                 });
                 
                 currentQueue = kitchenOrders;
