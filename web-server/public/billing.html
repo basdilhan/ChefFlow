@@ -442,9 +442,9 @@
             <form id="orderForm">
                 <div class="form-group">
                     <label for="orderId">Order ID</label>
-                    <input type="number" id="orderId" name="orderId" required min="1" 
-                           placeholder="Auto-generated order number">
-                    <p class="helper-text">Unique identifier for this order</p>
+                    <input type="number" id="orderId" name="orderId" required min="1" readonly
+                           placeholder="Auto-generated order number" style="background: #f8f9fa; cursor: not-allowed;">
+                    <p class="helper-text">Auto-generated unique identifier</p>
                 </div>
 
                 <div class="form-group">
@@ -593,6 +593,29 @@
         const messageDiv = document.getElementById('message');
         let orderCount = 0;
         let vipOrderCount = 0;
+        let nextOrderId = 100; // Default starting ID
+
+        // Fetch and set next order ID
+        async function loadNextOrderId() {
+            try {
+                const response = await fetch('/api/analytics?period=all');
+                const data = await response.json();
+                
+                if (data.orders && data.orders.length > 0) {
+                    // Find the highest order ID
+                    const maxId = Math.max(...data.orders.map(order => parseInt(order.id) || 0));
+                    nextOrderId = maxId + 1;
+                } else {
+                    nextOrderId = 100; // Start from 100 if no orders exist
+                }
+                
+                // Set the order ID field
+                document.getElementById('orderId').value = nextOrderId;
+            } catch (error) {
+                console.error('Error loading next order ID:', error);
+                document.getElementById('orderId').value = nextOrderId;
+            }
+        }
 
         // Load stats
         async function loadStats() {
@@ -618,6 +641,9 @@
 
         // Update stats every 5 seconds
         setInterval(loadStats, 5000);
+        
+        // Load next order ID on page load
+        loadNextOrderId();
         loadStats();
 
         form.addEventListener('submit', async (e) => {
@@ -650,8 +676,15 @@
                     if (formData.isVip) vipOrderCount++;
                     loadStats();
                     
-                    // Reset form
-                    form.reset();
+                    // Increment and set next order ID
+                    nextOrderId++;
+                    document.getElementById('orderId').value = nextOrderId;
+                    
+                    // Reset form except order ID
+                    document.getElementById('items').value = '';
+                    document.getElementById('prepTime').value = '';
+                    document.getElementById('isVip').checked = false;
+                    document.getElementById('isExpress').checked = false;
                 } else {
                     showMessage('✗ Error: ' + (result.error || 'Failed to submit order'), 'error');
                 }

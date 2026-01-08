@@ -129,6 +129,14 @@ app.post('/add-order', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
         
+        // Check if order ID already exists
+        const existingOrder = await ordersCollection.doc(id.toString()).get();
+        if (existingOrder.exists && existingOrder.data().status === 'PENDING') {
+            return res.status(409).json({ 
+                error: `Order #${id} already exists and is pending. Please use a different order number.` 
+            });
+        }
+        
         // Save to Firestore
         await ordersCollection.doc(id.toString()).set({
             id: parseInt(id),
