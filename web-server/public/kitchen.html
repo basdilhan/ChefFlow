@@ -265,6 +265,12 @@
             border-left: 5px solid #fbbf24;
             color: #fef3c7;
         }
+        
+        .order-card.pickup {
+            background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+            border-left: 5px solid #fbbf24;
+            color: #fef3c7;
+        }
 
         .order-header {
             display: flex;
@@ -308,6 +314,11 @@
         }
 
         .badge.express {
+            background: #fbbf24;
+            color: #78350f;
+        }
+        
+        .badge.pickup {
             background: #fbbf24;
             color: #78350f;
         }
@@ -615,7 +626,7 @@
                             <div class="order-badges">
                                 ${isActive ? '<span class="badge active">🔥 ACTIVE</span>' : ''}
                                 ${order.isVip ? '<span class="badge vip">⭐ VIP</span>' : ''}
-                                ${order.isExpress && !order.isVip ? '<span class="badge express">⚡ EXPRESS</span>' : ''}
+                                ${order.isExpress && !order.isVip ? '<span class="badge express">📦 PICKUP</span>' : ''}
                             </div>
                         </div>
                         <div class="order-items">

@@ -1,5 +1,11 @@
 # ChefFlow V2 - Doubly Linked List Implementation
 
+## Quick, Plain-Language Summary
+
+- What we built: A hand-written **doubly linked list** that stores kitchen orders in the exact order we want to cook them.
+- Why linked list: It lets us add or remove orders at the front in constant time, shuffle priorities without resizing arrays, and walk forward/backward when we need to reprioritize.
+- Project purpose: Keep the kitchen queue fast and fair—VIP orders first, express next, then normal orders sorted by prep time—so chefs always know the next best order to cook.
+
 ## 📋 Overview
 
 ChefFlow V2 uses a **manually implemented doubly linked list** to manage the kitchen order queue efficiently. This implementation provides O(1) time complexity for most operations and enables smart priority-based ordering.

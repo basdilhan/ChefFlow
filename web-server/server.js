@@ -313,7 +313,7 @@ app.get('/api/analytics', async (req, res) => {
         
         console.log(`Analytics: Filtered to ${totalOrders} orders for period '${period}'`);
         console.log(`  - Completed: ${completedOrders}, Pending: ${pendingOrders}, Cancelled: ${cancelledOrders}`);
-        console.log(`  - VIP: ${vipOrders}, Express: ${expressOrders}`);
+        console.log(`  - VIP: ${vipOrders}, Pickup: ${expressOrders}`);
         
         // Sort orders by timestamp descending
         orders.sort((a, b) => {

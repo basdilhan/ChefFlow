@@ -21,7 +21,7 @@ public class KitchenQueue {
             return;
         }
         
-        // Priority order: VIP > Express > Normal (sorted by prepTime within each group)
+        // Priority order: VIP > Pickup > Normal (sorted by prepTime within each group)
         OrderNode current = head;
         
         // Skip all VIP orders first
@@ -29,13 +29,13 @@ public class KitchenQueue {
             current = current.next;
         }
         
-        // If this is an express order, skip other express orders
+        // If this is a pickup order, skip other pickup orders
         if (isExpress) {
             while (current != null && current.isExpress && !current.isVip) {
                 current = current.next;
             }
         } else {
-            // For normal orders, skip all express orders first
+            // For normal orders, skip all pickup orders first
             while (current != null && current.isExpress && !current.isVip) {
                 current = current.next;
             }
@@ -84,11 +84,35 @@ public class KitchenQueue {
             // Empty list
             head = newNode;
             tail = newNode;
+            return;
+        }
+
+        // Insert VIP in prep-time order within the VIP zone (still ahead of non-VIP)
+        OrderNode current = head;
+
+        // Walk through VIP section while prep times are <= new order
+        while (current != null && current.isVip && current.prepTime <= time) {
+            current = current.next;
+        }
+
+        if (current == null) {
+            // All existing orders are VIP with shorter/equal time; place at tail
+            tail.next = newNode;
+            newNode.prev = tail;
+            tail = newNode;
         } else {
-            // Add to head
-            newNode.next = head;
-            head.prev = newNode;
-            head = newNode;
+            // Insert before the first VIP with larger prep time or the first non-VIP
+            newNode.next = current;
+            newNode.prev = current.prev;
+
+            if (current.prev != null) {
+                current.prev.next = newNode;
+            } else {
+                // New smallest prep time among VIPs
+                head = newNode;
+            }
+
+            current.prev = newNode;
         }
     }
 
