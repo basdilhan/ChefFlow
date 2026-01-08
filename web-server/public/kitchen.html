@@ -255,6 +255,12 @@
             filter: blur(8px);
         }
 
+        .order-card.completed {
+            opacity: 0.6;
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            border-left: 5px solid #10b981;
+        }
+
         .order-card.vip {
             background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
             border-left: 5px solid #ef4444;
@@ -304,6 +310,11 @@
         }
 
         .badge.active {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge.completed {
             background: #10b981;
             color: white;
         }
@@ -569,9 +580,28 @@
         // Fetch live queue every second
         async function fetchQueue() {
             try {
-                const response = await fetch('/live-queue');
+                const response = await fetch('/api/analytics?period=today');
                 const data = await response.json();
-                currentQueue = data.queue || [];
+                
+                // Filter to show pending orders + recently completed (last 30 min) + processing
+                const thirtyMinutesAgo = Date.now() - (30 * 60 * 1000);
+                const kitchenOrders = data.orders.filter(order => {
+                    // Always show pending orders
+                    if (order.status === 'PENDING') return true;
+                    
+                    // Show completed orders from last 30 minutes
+                    const orderTime = typeof order.timestamp === 'number' 
+                        ? order.timestamp 
+                        : order.timestamp?._seconds * 1000 || Date.now();
+                    
+                    if (order.status === 'COMPLETED' && orderTime >= thirtyMinutesAgo) {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+                
+                currentQueue = kitchenOrders;
                 renderQueue();
             } catch (error) {
                 console.error('Error fetching queue:', error);
@@ -610,23 +640,27 @@
             document.getElementById('completeBtn').disabled = !selectedOrderId;
 
             container.innerHTML = currentQueue.map((order, index) => {
-                const isActive = index === 0;
                 const isSelected = selectedOrderId === order.id;
+                const isPending = order.status === 'PENDING';
                 
                 let cardClasses = ['order-card'];
                 if (order.isVip) cardClasses.push('vip');
                 else if (order.isExpress) cardClasses.push('express');
-                if (isActive) cardClasses.push('active');
                 if (isSelected) cardClasses.push('selected');
+                
+                // Add opacity for completed orders
+                if (order.status === 'COMPLETED') {
+                    cardClasses.push('completed');
+                }
                 
                 return `
                     <div class="${cardClasses.join(' ')}" onclick="selectOrder(${order.id})">
                         <div class="order-header">
                             <div class="order-id">#${order.id}</div>
                             <div class="order-badges">
-                                ${isActive ? '<span class="badge active">🔥 ACTIVE</span>' : ''}
-                                ${order.isVip ? '<span class="badge vip">⭐ VIP</span>' : ''}
-                                ${order.isExpress && !order.isVip ? '<span class="badge express">📦 PICKUP</span>' : ''}
+                                ${order.status === 'COMPLETED' ? '<span class="badge completed">✓ READY</span>' : ''}
+                                ${order.isVip && order.status !== 'COMPLETED' ? '<span class="badge vip">⭐ VIP</span>' : ''}
+                                ${order.isExpress && !order.isVip && order.status !== 'COMPLETED' ? '<span class="badge express">📦 PICKUP</span>' : ''}
                             </div>
                         </div>
                         <div class="order-items">
@@ -637,9 +671,9 @@
                                 <span>⏱️</span>
                                 <span>${order.prepTime} min</span>
                             </div>
-                            <button class="cancel-btn" onclick="event.stopPropagation(); cancelOrder(${order.id})">
+                            ${isPending ? `<button class="cancel-btn" onclick="event.stopPropagation(); cancelOrder(${order.id})">
                                 ✕ Cancel
-                            </button>
+                            </button>` : ''}
                         </div>
                     </div>
                 `;
